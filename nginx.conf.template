@@ -11,9 +11,11 @@ server {
     resolver 8.8.8.8 1.1.1.1 valid=300s;
     resolver_timeout 5s;
 
-    # 1. 代理 /blog 及其子路徑 到 ccibloglab
-    location ^~ /blog {
-        proxy_pass https://ccibloglab.zeabur.app/;
+    # 1. 代理 /blog 及其子路徑 到 ccibloglab (不區分大小寫)
+    location ~* ^/blog {
+        # 這裡不加後面的斜線 (/)，讓原有的 Request URI (例如 /Blog/Detail/xxx) 原封不動傳至後端
+        # 這樣 .NET 的 {controller=Blog}/{action=Detail} 路由機制才抓得到正確的路徑
+        proxy_pass https://ccibloglab.zeabur.app;
         
         # 確保 HTTPS 握手時帶上正確的 SNI
         proxy_ssl_server_name on;
@@ -25,9 +27,6 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # 處理後端可能的重定向
-        proxy_redirect https://ccibloglab.zeabur.app/ /blog/;
     }
 
     # 透過 Referer 判斷靜態資源的所屬後端 (解決 CSS/JS 載入 404 問題)
