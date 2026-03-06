@@ -1,5 +1,5 @@
 server {
-    listen 443;
+    listen ${PORT};
     server_name _;
 
     # 如果在 Zeabur 邊緣節點收到的是 HTTP 請求，強制轉向 HTTPS
